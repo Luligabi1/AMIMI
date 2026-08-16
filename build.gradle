@@ -108,7 +108,11 @@ dependencies {
     implementation "aztech:Modern-Industrialization:${modern_industrialization_version}"
     implementation "org.appliedenergistics:guideme:${project.guideme_version}"
 
-    implementation "brachy.modularui:modularui-mc1.21.1:${modularui_version}"
+    jarJar(implementation("brachy.modularui:modularui-mc1.21.1:${modularui_version}")) {
+        version {
+            prefer "${modularui_version}"
+        }
+    }
 
     compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
     compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"

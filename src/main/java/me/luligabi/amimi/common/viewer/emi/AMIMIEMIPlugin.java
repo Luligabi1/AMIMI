@@ -5,11 +5,11 @@ import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 
 @EmiEntrypoint
-public class EMIInit implements EmiPlugin {
+public class AMIMIEMIPlugin implements EmiPlugin {
 
     @Override
     public void register(EmiRegistry registry) {
-        registry.addCategory(MultiblockInfoEmiCategory.CATEGORY);
+        registry.addCategory(MultiblockInfoEmiCategory.INSTANCE);
         MultiblockInfoEmiCategory.registerDisplays(registry);
     }
 }

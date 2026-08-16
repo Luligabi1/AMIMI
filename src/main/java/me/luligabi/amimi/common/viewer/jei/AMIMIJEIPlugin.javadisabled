@@ -1,0 +1,30 @@
+package me.luligabi.amimi.common.viewer.jei;
+
+import me.luligabi.amimi.common.AMIMI;
+import mezz.jei.api.IModPlugin;
+import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.registration.IRecipeCategoryRegistration;
+import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.resources.ResourceLocation;
+
+@JeiPlugin
+public class AMIMIJEIPlugin implements IModPlugin {
+
+    @Override
+    public ResourceLocation getPluginUid() {
+        return AMIMI.id("jei_plugin");
+    }
+
+    @Override
+    public void registerCategories(final IRecipeCategoryRegistration registry) {
+        IJeiHelpers jeiHelpers = registry.getJeiHelpers();
+        registry.addRecipeCategories(new MultiblockInfoJeiCategory(jeiHelpers));
+    }
+
+    @Override
+    public void registerRecipes(final IRecipeRegistration registration) {
+        MultiblockInfoJeiCategory.registerRecipes(registration);
+    }
+
+}

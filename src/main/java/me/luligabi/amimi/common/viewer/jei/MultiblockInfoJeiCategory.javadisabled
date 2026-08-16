@@ -1,0 +1,108 @@
+package me.luligabi.amimi.common.viewer.jei;
+
+import aztech.modern_industrialization.MIItem;
+import aztech.modern_industrialization.compat.rei.machines.ReiMachineRecipes;
+import brachy.modularui.integration.jei.recipe.ModularUIRecipeCategory;
+import me.luligabi.amimi.common.AMIMI;
+import me.luligabi.amimi.common.util.MultiblockSet;
+import me.luligabi.amimi.common.viewer.MultiblockPreviewWidget;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
+import mezz.jei.api.gui.inputs.RecipeSlotUnderMouse;
+import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.gui.widgets.ISlottedRecipeWidget;
+import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.IRecipeRegistration;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class MultiblockInfoJeiCategory extends
+        ModularUIRecipeCategory<MultiblockInfoJeiCategory.MultiblockPreviewInfoWrapper> {
+
+    public final static RecipeType<MultiblockPreviewInfoWrapper> RECIPE_TYPE = new RecipeType<>(
+            AMIMI.id("multiblock_info"),
+            MultiblockPreviewInfoWrapper.class);
+    private final IDrawable icon;
+
+    public MultiblockInfoJeiCategory(final IJeiHelpers helpers) {
+        super(v -> new MultiblockPreviewWidget(v.multiblockSet, null, 150, 135),
+                v -> v.multiblockSet.getCategoryId());
+        IGuiHelper guiHelper = helpers.getGuiHelper();
+        this.icon = guiHelper.createDrawableItemLike(MIItem.WRENCH.asItem());
+    }
+
+    public static void registerRecipes(IRecipeRegistration registry) {
+        final List<MultiblockPreviewInfoWrapper> recipes = MultiblockSet.fromShapes(ReiMachineRecipes.multiblockShapes)
+                .stream()
+                .map(MultiblockPreviewInfoWrapper::new)
+                .toList();
+        registry.addRecipes(RECIPE_TYPE, recipes);
+    }
+
+    @Override
+    public void createRecipeExtras(@NotNull IRecipeExtrasBuilder builder, @NotNull MultiblockPreviewInfoWrapper recipe,
+                                   @NotNull IFocusGroup focuses) {
+        super.createRecipeExtras(builder, recipe, focuses);
+        List<IRecipeSlotDrawable> slots = new ArrayList<>(builder.getRecipeSlots().getSlots());
+        class ProxyRecipeWidget implements ISlottedRecipeWidget {
+
+            private final ScreenPosition position = new ScreenPosition(0, 0);
+
+            @Override
+            public Optional<RecipeSlotUnderMouse> getSlotUnderMouse(double mouseX, double mouseY) {
+                return slots.stream().findFirst().map(slot -> new RecipeSlotUnderMouse(slot, 0, 0));
+            }
+
+            @Override
+            public ScreenPosition getPosition() {
+                return position;
+            }
+        }
+
+        builder.addSlottedWidget(new ProxyRecipeWidget(), slots);
+    }
+
+    @Override
+    public @Nullable ResourceLocation getRegistryName(MultiblockPreviewInfoWrapper recipe) {
+        return recipe.multiblockSet.getCategoryId();
+    }
+
+    @Override
+    @NotNull
+    public RecipeType<MultiblockPreviewInfoWrapper> getRecipeType() {
+        return RECIPE_TYPE;
+    }
+
+    @Override
+    public Component getTitle() {
+        return Component.translatable(Lang.CATEGORY_NAME);
+    }
+
+    @NotNull
+    @Override
+    public IDrawable getIcon() {
+        return icon;
+    }
+
+    @Override
+    public int getWidth() {
+        return 150;
+    }
+
+    @Override
+    public int getHeight() {
+        return 135;
+    }
+
+    public record MultiblockPreviewInfoWrapper(MultiblockSet multiblockSet) {}
+}

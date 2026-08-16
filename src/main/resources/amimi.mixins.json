@@ -4,6 +4,7 @@
   "package": "me.luligabi.amimi.common.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BaseSchemaRendererAccessor",
     "ViewerSetupMixin"
   ],
   "client": [
