@@ -23,6 +23,7 @@ import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.luligabi.amimi.client.ClientConfig;
 import me.luligabi.amimi.common.util.Lang;
 import me.luligabi.amimi.common.util.render.MultiblockRenderer;
 import me.luligabi.amimi.common.util.MultiblockSet;
@@ -42,6 +43,23 @@ import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+/*
+ * This file is adapted code originally part of GregTech:CEu, hosted at https://github.com/GregTechCEu/GregTech-Modern
+ *
+ * This file is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program. If not, see
+ * <https://www.gnu.org/licenses/lgpl-3.0.html>.
+ */
 @Accessors(chain = true)
 public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidget> {
 
@@ -49,13 +67,9 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
     private final int width;
     private final int height;
 
-    // schema stuff
-    private DynamicSyncHandler partsViewWidget;
-    // private final SchemaRenderer renderer;
     private final DynamicHandler schemaHandler = new DynamicHandler();
     private final DynamicHandler partsHandler = new DynamicHandler();
     private final DynamicHandler selectedBlockHandler = new DynamicHandler();
-
 
     private final Reference2IntMap<Block> blockCounts = new Reference2IntOpenHashMap<>();
 
@@ -63,17 +77,7 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
     @Setter
     private MultiblockSchemaInfo multiblockSchemaInfo;
 
-    @Setter
-    private boolean isFlipped = false;
-    @Setter
-    private Direction frontFacing;
-    @Setter
-    private Direction upFacing;
-    @Setter
-    private @Nullable BlockPos controllerPos;
     private SelectionInfo selectionInfo = SelectionInfo.empty();
-
-    private int yLevel = -99;
 
     @Getter
     private static boolean renderHatches = true;
@@ -104,16 +108,7 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
         this.multiblockDefinition = definition;
         this.width = width;
         this.height = height;
-        //if (!GTCEu.isClientThread()) return;
-
-
-//        this.frontFacing = multiblockSet.getRotationState().defaultDirection;
-//        this.upFacing = switch (multiblockSet.getRotationState()) {
-//            case Y_AXIS -> Direction.NORTH;
-//            case ALL, NON_Y_AXIS, NONE -> Direction.UP;
-//        };
-        this.frontFacing = Direction.WEST;
-        this.upFacing = Direction.UP;
+        // FIXME if (!GTCEu.isClientThread()) return;
 
         this.multiblockSchemaInfo = schemaInfo == null ? new MultiblockSchemaInfo() : schemaInfo;
         this.initSchemas();
@@ -145,82 +140,6 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                 })
         );
 
-        this.selectedBlockHandler.widgetProvider(() -> {
-            ItemStack selected = this.selectionInfo.stack();
-            if (selected.isEmpty()) return null;
-
-            return new TextWidget<>(Component.literal("..."));
-        });
-
-//        this.coverChildren()
-//                .padding(7)
-////                .child(new ButtonWidget<>()
-////                        .tooltip(r -> r.addLine(Component.literal("Press to display preview in world!")))
-////                        .rightRel(1.0f)
-////                        .onMousePressed((c, b) -> {
-////                            if (controllerPos != null &&
-////                                    !this.getMultiblockSchemaInfo().getStructureBlocks().isEmpty()) {
-////                                BlockPos origin = controllerPos.offset(
-////                                        this.getMultiblockSchemaInfo().getMapSchema().getControllerPos().multiply(-1));
-////                                PatternPreviewRenderer.INSTANCE.showPreview(origin,
-////                                        this.getMultiblockSchemaInfo().getMapSchema(),
-////                                        this.multiblockSchemaInfo.getMultiSchema().getSchemaRenderer().renderFilter(),
-////                                        ConfigHolder.INSTANCE.client.inWorldPreviewDuration * 20);
-////                            }
-////                            return true;
-////                        }))
-//                .child(Flow.col()
-//                        .name("main")
-//                        .coverChildren()
-////                        .child(new ListWidget<>()
-////                                .name("structure_patterns")
-////                                .widthRel(1f)
-////                                .coverChildrenHeight()
-////                                .children(patterns, e -> {
-////                                    Flow patternColumn = Flow.col()
-////                                            .coverChildren();
-////                                    Flow predicatesRow = Flow.row()
-////                                            .name("predicates")
-////                                            .height(20)
-////                                            .coverChildrenWidth();
-////
-////                                    if (e.getValue() instanceof BlockPattern blockPattern) {
-////                                        createSliceSliders(patternColumn, blockPattern);
-////                                        createPredicateMenus(predicatesRow, blockPattern);
-////                                    } else if (e.getValue() instanceof ExpandablePattern expandablePattern) {
-////                                        createConstraintSliders(patternColumn, expandablePattern);
-////                                    }
-////
-////                                    patternColumn.child(predicatesRow);
-////                                    return patternColumn;
-////                                }))
-//                        .child(Flow.row()
-//                                .name("schema_widgets")
-//                                .crossAxisAlignment(Alignment.CrossAxis.START)
-//                                .coverChildren()
-//                                .child(new DynamicWidget<>()
-//                                        .name("selected_block")
-//                                        .coverChildren(20)
-//                                        .clientOnlyHandler(this.selectedBlockHandler))
-//                                .child(new DynamicWidget<>()
-//                                        .name("schema_view")
-//                                        .coverChildrenWidth()
-//                                        .coverChildrenHeight()
-//                                        .clientOnlyHandler(schemaHandler))
-////                                .child(new DynamicWidget<>()
-////                                        .coverChildrenWidth()
-////                                        .heightRel(1f)
-////                                        .name("parts_view")
-////                                        .clientOnlyHandler(partsHandler))
-//                                .child(new ButtonWidget<>()
-//                                        .tooltip(r -> r.addLine(Component.literal("ebaaaaaaaaaaaaaaaaa")))
-//                                        .rightRel(1.0f)
-//                                        .onMousePressed((c, b) -> {
-//                                            this.proceedSchemaList(false);
-//                                            return true;
-//                                        }))));
-
-
         this.coverChildren()
                 .padding(4)
                 .child(
@@ -250,7 +169,7 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                                                 .top(0)
                                                 .right(0)
                                                 .childIf(
-                                                    this.multiblockSchemaInfo.getGuidePage() != null,
+                                                    ClientConfig.INSTANCE.enableOpenGuidePageButton.getAsBoolean() && this.multiblockSchemaInfo.getGuidePage() != null,
                                                     () -> new ButtonWidget<>()
                                                             .onMousePressed((c, b) -> {
                                                                 final Pair<Guide, PageAnchor> guidePage = this.multiblockSchemaInfo.getGuidePage();
@@ -258,7 +177,7 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                                                                 return true;
                                                             })
                                                             .overlay(GuiTextures.HELP)
-                                                            .tooltip(r -> r.addLine(Component.translatable(Lang.OPEN_GUIDE)))
+                                                            .tooltip(r -> r.addLine(Lang.OPEN_GUIDE.text()))
                                                 )
                                                 .child(
                                                     new ButtonWidget<>()
@@ -267,7 +186,7 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                                                             return true;
                                                         })
                                                         .overlay(new SuppliedUITexture(() -> renderHatches ? GuiTextures.VISIBLE : GuiTextures.INVISIBLE))
-                                                        .tooltip(r -> r.addLine(Component.translatable(Lang.HIDE_HATCH_PLACEMENTS)))
+                                                        .tooltip(r -> r.addLine(Lang.HIDE_HATCH_PLACEMENTS.text()))
                                                 )
                                                 .childIf(
                                                     this.multiblockSchemaInfo.schemaSize() > 1,
@@ -278,66 +197,17 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                                                         })
                                                         .overlay(new SuppliedUITexture(() -> Screen.hasShiftDown() ? GuiTextures.LEFTLOAD : GuiTextures.RIGHTLOAD))
                                                         .tooltipDynamic(r -> {
-                                                            final String key = Screen.hasShiftDown() ? Lang.SHOW_PREVIOUS_TIER : Lang.SHOW_NEXT_TIER;
-                                                            r.addLine(Component.translatable(key));
+                                                            r.addLine((Screen.hasShiftDown() ? Lang.SHOW_PREVIOUS_TIER : Lang.SHOW_NEXT_TIER).text());
+                                                            r.markDirty();
                                                         })
                                                 )
                                                 .child(new SuppliedLayerButton(
                                                         () -> this.multiblockSchemaInfo,
                                                         () -> this.activeIndex
                                                 ))
-                                                .child(new DynamicWidget<>()
-                                                    .name("selected_block")
-                                                    .coverChildren(20)
-                                                    .clientOnlyHandler(this.selectedBlockHandler)
-                                                )
+
                                 )
                 );
-
-//                .child(new DynamicWidget<>()
-//                        .name("schema_view")
-//                        .coverChildrenWidth()
-//                        .coverChildrenHeight()
-//                        .clientOnlyHandler(this.schemaHandler))
-
-
-//                .child(Flow.row()
-//                        .name("schema_widgets")
-//                        .fullWidth()
-//                        .mainAxisAlignment(Alignment.MainAxis.CENTER)
-//                        .child(new DynamicWidget<>()
-//                                .name("schema_view")
-//                                .coverChildrenWidth()
-//                                .coverChildrenHeight()
-//                                .clientOnlyHandler(this.schemaHandler))
-//                )
-
-//                .child(Flow.col()
-//                        .name("main")
-//                        .coverChildren()
-//                        .child(Flow.row()
-//                                .name("schema_widgets")
-//                                .fullWidth()
-//                                .mainAxisAlignment(Alignment.MainAxis.CENTER)
-//                                .coverChildren()
-//                                .child(new DynamicWidget<>()
-//                                        .name("selected_block")
-//                                        .coverChildren(20)
-//                                        .clientOnlyHandler(this.selectedBlockHandler))
-//                                .child(new DynamicWidget<>()
-//                                        .name("schema_view")
-//                                        .coverChildrenWidth()
-//                                        .coverChildrenHeight()
-//                                        .clientOnlyHandler(this.schemaHandler))
-
-//                        )
-//                        .child(new DynamicWidget<>()
-//                                .name("parts_view")
-//                                .coverChildrenWidth()
-//                                .coverChildrenHeight()
-//                                .clientOnlyHandler(partsHandler)
-//                        )
-//                );
     }
 
     @ApiStatus.Internal
@@ -411,9 +281,6 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
     }
 
     private void refreshViewWidget() {
-        if (partsViewWidget != null) {
-            this.partsViewWidget.notifyUpdate((packet) -> {});
-        }
         if (partsHandler != null) {
             this.partsHandler.notifyUpdate();
         }

@@ -36,7 +36,7 @@ public class MultiblockInfoEmiCategory extends EmiRecipeCategory {
 
     @Override
     public Component getName() {
-        return Component.translatable(Lang.CATEGORY_NAME);
+        return Lang.CATEGORY_NAME.text();
     }
 
     public static class MultiblockInfoEmiWrapper extends ModularUIEmiRecipe {

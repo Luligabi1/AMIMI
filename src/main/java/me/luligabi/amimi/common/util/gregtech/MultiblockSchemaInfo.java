@@ -30,6 +30,23 @@ import org.joml.Vector3f;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/*
+ * This file is adapted code originally part of GregTech:CEu, hosted at https://github.com/GregTechCEu/GregTech-Modern
+ *
+ * This file is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program. If not, see
+ * <https://www.gnu.org/licenses/lgpl-3.0.html>.
+ */
 public class MultiblockSchemaInfo {
 
     @Getter
@@ -54,42 +71,8 @@ public class MultiblockSchemaInfo {
         return multiblockSchemas.size();
     }
 
-//    @Getter
-//    private @Nullable AbstractStructureHelper structureHelper;
-
     @ApiStatus.Internal
     public void initSchemas(MultiblockSet multiblockDefinition, @Nullable Runnable onSchemaRefresh) {
-
-//        IBlockPattern pattern = multiblockDefinition.getStructurePatterns().get(DEFAULT_STRUCTURE).get();
-//
-//        if (this.structureHelper == null) {
-//            if (pattern instanceof BlockPattern blockPattern) {
-//                if (this.userSliceRepeats.isEmpty()) {
-//                    for (int i = 0; i < blockPattern.getSlices().length; i++) {
-//                        this.userSliceRepeats.put(i, blockPattern.getSlices()[i].getMinRepeats());
-//                    }
-//                }
-//                // reinterpret slider values as slice repeats?
-//                this.structureHelper = AbstractStructureHelper.blockPattern(this.userSliceRepeats);
-//
-//            } else if (pattern instanceof ExpandablePattern expandablePattern) {
-//                if (this.userDimensions.isEmpty()) {
-//                    expandablePattern.getBoundsConstraints().apply().stream()
-//                            .mapToInt(Pair::left)
-//                            .forEach(this.userDimensions::add);
-//                }
-//                // reinterpret slider values as bounds?
-//                this.structureHelper = AbstractStructureHelper.expandable(this.userDimensions);
-//
-//            } else {
-//                // throw? log?
-//                return;
-//            }
-//        }
-
-//        this.structureHelper.populate(resultStructure, pattern, this.userGlobalBlockPreferences,
-//                frontFacing, upFacing, isFlipped);
-
         final Block controller = BuiltInRegistries.BLOCK.get(multiblockDefinition.machine());
 
         for (final ShapeTemplate st : multiblockDefinition.shapeTemplates()) {

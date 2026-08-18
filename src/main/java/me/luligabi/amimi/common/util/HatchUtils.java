@@ -64,11 +64,11 @@ public class HatchUtils {
         };
     }
 
+    public static final int DEFAULT_COLOR = Color.rgb(111, 225, 111);
+
     private static final int ITEM_COLOR = Color.rgb(255, 128, 64);
     private static final int FLUID_COLOR = Color.rgb(57, 70, 219);
     private static final int ENERGY_COLOR = Color.rgb(235, 224, 20);
     private static final int NUCLEAR_COLOR = Color.rgb(35, 158, 33);
-
-    private static final int DEFAULT_COLOR = Color.rgb(111, 225, 111);
     private static final int UNKNOWN_COLOR = Color.rgb(188, 50, 205);
 }

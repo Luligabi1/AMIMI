@@ -1,33 +1,42 @@
 package me.luligabi.amimi.common.util;
 
+import aztech.modern_industrialization.MI;
+import lombok.Getter;
 import me.luligabi.amimi.common.AMIMI;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-public class Lang {
+public enum Lang {
+    CATEGORY_NAME("Multiblock Information"),
+    SHOW_NEXT_TIER("Show next tier"),
+    SHOW_PREVIOUS_TIER("Show previous tier"),
+    HIDE_HATCH_PLACEMENTS("Hide Hatch Placements"),
+    SHOW_HATCH_PLACEMENTS("Show Hatch Placements"),
+    OPEN_GUIDE("Open guide page");
 
-    public static final String CATEGORY_NAME = "category.%s.multiblock_info".formatted(AMIMI.ID);
+    private final String root;
+    @Getter
+    private final String englishText;
+    @Getter
+    private final List<String> additionalTranslationsKey;
 
-    public static final String SHOW_NEXT_TIER = "text.%s.show_next_tier".formatted(AMIMI.ID);
-    public static final String SHOW_PREVIOUS_TIER = "text.%s.show_previous_tier".formatted(AMIMI.ID);
+    Lang(String englishText, String... additionalTranslationKey) {
+        this.root = "text." + AMIMI.ID;
+        this.englishText = englishText;
+        this.additionalTranslationsKey = List.of(additionalTranslationKey);
+    }
 
-    public static final String HIDE_HATCH_PLACEMENTS = "text.%s.hide_hatches".formatted(AMIMI.ID);
-    public static final String SHOW_HATCH_PLACEMENTS = "text.%s.show_hatches".formatted(AMIMI.ID);
+    public String getTranslationKey() {
+        return this.root + '.' + name();
+    }
 
-    public static final String OPEN_GUIDE = "text.%s.open_guide".formatted(AMIMI.ID);
+    public MutableComponent text() {
+        return Component.translatable(getTranslationKey());
+    }
 
-
-    public static final HashMap<String, String> TRANSLATIONS = new HashMap<>(Map.ofEntries(
-            Map.entry(CATEGORY_NAME, "Multiblock Information"),
-
-            Map.entry(SHOW_NEXT_TIER, "Show next tier"),
-            Map.entry(SHOW_PREVIOUS_TIER, "Show previous tier"),
-
-            Map.entry(HIDE_HATCH_PLACEMENTS, "Hide Hatch Placements"),
-            Map.entry(SHOW_HATCH_PLACEMENTS, "Show Hatch Placements"),
-
-            Map.entry(OPEN_GUIDE, "Open guide page")
-    ));
-
+    public MutableComponent text(Object... args) {
+        return Component.translatable(getTranslationKey(), args);
+    }
 }

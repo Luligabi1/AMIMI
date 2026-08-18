@@ -85,7 +85,7 @@ public class MultiblockInfoJeiCategory extends
 
     @Override
     public Component getTitle() {
-        return Component.translatable(Lang.CATEGORY_NAME);
+        return Lang.CATEGORY_NAME.text();
     }
 
     @NotNull

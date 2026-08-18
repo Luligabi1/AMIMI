@@ -1,6 +1,7 @@
 package me.luligabi.amimi.datagen.client.provider;
 
 import me.luligabi.amimi.common.AMIMI;
+import me.luligabi.amimi.common.util.AMIMIConfigBuilder;
 import me.luligabi.amimi.common.util.Lang;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
@@ -13,7 +14,13 @@ public class LangProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
-        Lang.TRANSLATIONS.forEach(this::add);
+        for (final Lang l : Lang.values()) {
+            this.add(l.getTranslationKey(), l.getEnglishText());
+        }
+
+        for (var entry : AMIMIConfigBuilder.configTranslations.entrySet()) {
+            this.add(entry.getKey(), entry.getValue());
+        }
     }
 
 }

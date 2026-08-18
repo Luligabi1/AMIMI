@@ -8,7 +8,9 @@ import brachy.modularui.utils.Color;
 import brachy.modularui.widget.sizer.Area;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.luligabi.amimi.client.ClientConfig;
 import me.luligabi.amimi.common.mixin.BaseSchemaRendererAccessor;
+import me.luligabi.amimi.common.util.HatchUtils;
 import me.luligabi.amimi.common.util.gregtech.BlockInfo;
 import me.luligabi.amimi.common.util.gregtech.MultiblockSchemaInfo;
 import me.luligabi.amimi.common.viewer.MultiblockPreviewWidget;
@@ -20,6 +22,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+/*
+ * This file is adapted code originally part of Modular UI Modern, hosted at https://github.com/brachy84/ModularUI-Modern
+ *
+ * This file is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program. If not, see
+ * <https://www.gnu.org/licenses/lgpl-3.0.html>.
+ */
 public class MultiblockRenderer extends SchemaRenderer {
 
 
@@ -101,15 +120,20 @@ public class MultiblockRenderer extends SchemaRenderer {
         }
 
         if (MultiblockPreviewWidget.isRenderHatches()) {
-            highlightCache.entrySet().stream().findFirst().get().getValue()
-                    .renderHighlight(cameraPs, focus, null, camera().pos());
+//            highlightCache.entrySet().stream().findFirst().get().getValue()
+//                    .renderHighlight(cameraPs, focus, null, camera().pos());
 
             for (Map.Entry<BlockPos, MultiblockSchemaInfo.HatchData> data : hatchData.entrySet()) {
                 if (!this.renderFilter().shouldRender(data.getKey(), null)) continue;
-                final CulledBlockHighlight cache = highlightCache.get(data.getValue().color());
-                if (cache != null) {
-                    cache.renderHighlight(cameraPs, data.getKey(), null, camera().pos());
+
+                final CulledBlockHighlight highlight;
+                if (ClientConfig.INSTANCE.uniqueHatchColors.getAsBoolean()) {
+                    highlight = highlightCache.getOrDefault(data.getValue().color(), defaultHighlight);
+                } else {
+                    highlight = defaultHighlight;
                 }
+
+                highlight.renderHighlight(cameraPs, data.getKey(), null, camera().pos());
             }
         }
 
@@ -134,6 +158,7 @@ public class MultiblockRenderer extends SchemaRenderer {
         }
     }
 
+    private static final CulledBlockHighlight defaultHighlight = new CulledBlockHighlight(Color.withAlpha(HatchUtils.DEFAULT_COLOR, 0.9f), true, 1 / 16f);;
     private static final Map<Integer, CulledBlockHighlight> highlightCache = new HashMap<>();
 
 }

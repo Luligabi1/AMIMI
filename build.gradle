@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'idea'
     id 'net.neoforged.moddev' version '2.0.141'
+    id "me.modmuss50.mod-publish-plugin" version "2.1.1"
 }
 
 version = mod_version
@@ -161,4 +162,57 @@ idea {
         downloadSources = true
         downloadJavadoc = true
     }
+}
+
+ext.getChangeLog = { ->
+    return "Initial alpha release"
+}
+
+publishMods {
+    file = jar.archiveFile
+    version = "${project.mod_version}"
+    displayName = "${project.mod_version}"
+    modLoaders.add("neoforge")
+    type = ALPHA //STABLE
+    changelog = project.getChangeLog()
+
+    curseforge {
+        accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+        projectId = "1625971"
+        projectSlug = "amimi"
+        minecraftVersions.add("${project.minecraft_version}")
+        client = true
+        server = true
+
+        embeds("modularui")
+        requires("modern-industrialization")
+        requires("emi")
+//        optional("emi")
+//        optional("jei")
+
+        announcementTitle = "Download from CurseForge"
+    }
+
+    modrinth {
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        projectId = "hUqkjVpm"
+        minecraftVersions.add("${project.minecraft_version}")
+        environment = CLIENT_AND_SERVER
+
+//      embeds("modularui")
+        requires("modern-industrialization")
+        requires("emi")
+//        optional("emi")
+//        optional("jei")
+
+        announcementTitle = "Download from Modrinth"
+    }
+
+//    discord {
+//        webhookUrl = providers.environmentVariable("CAFETERIA_MOD_RELEASE_WEBHOOK")
+//        username = "${rootProject.mod_name}"
+//        avatarUrl = "https://cdn.modrinth.com/data/jXqDKaST/c0bd6980760c14410cc9a517ec5176d230f817d1_96.webp"
+//
+//        content = changelog.map { "# " + (rootProject.mod_name as String) + " " + (project.mod_version as String) + " has been released \n" + it}
+//    }
 }

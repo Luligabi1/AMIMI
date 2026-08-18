@@ -1,8 +1,14 @@
 {
-  "category.amimi.multiblock_info": "Multiblock Information",
-  "text.amimi.hide_hatches": "Hide Hatch Placements",
-  "text.amimi.open_guide": "Open guide page",
-  "text.amimi.show_hatches": "Show Hatch Placements",
-  "text.amimi.show_next_tier": "Show next tier",
-  "text.amimi.show_previous_tier": "Show previous tier"
+  "amimi.configuration.enableOpenGuidePageButton": "Enable open guide page button",
+  "amimi.configuration.enableOpenGuidePageButton.tooltip": "Whether users can open a multiblock's related GuideME page, if available. Note that users don't need to have the corresponding book in their inventory and can open other guide pages.",
+  "amimi.configuration.misc": "Miscellaneous",
+  "amimi.configuration.rendering": "Rendering",
+  "amimi.configuration.uniqueHatchColors": "Render Unique Hatch Colors",
+  "amimi.configuration.uniqueHatchColors.tooltip": "Whether when a hatch position only has one type allowed (i.e. only fluid I/O), an unique color should be used to highlight it. Otherwise, uses the default green.",
+  "text.amimi.CATEGORY_NAME": "Multiblock Information",
+  "text.amimi.HIDE_HATCH_PLACEMENTS": "Hide Hatch Placements",
+  "text.amimi.OPEN_GUIDE": "Open guide page",
+  "text.amimi.SHOW_HATCH_PLACEMENTS": "Show Hatch Placements",
+  "text.amimi.SHOW_NEXT_TIER": "Show next tier",
+  "text.amimi.SHOW_PREVIOUS_TIER": "Show previous tier"
 }
