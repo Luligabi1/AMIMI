@@ -1,6 +1,8 @@
 package me.luligabi.amimi.common.viewer;
 
+import brachy.modularui.api.MCHelper;
 import brachy.modularui.api.drawable.IDrawable;
+import brachy.modularui.api.drawable.Text;
 import brachy.modularui.api.widget.IGuiAction;
 import brachy.modularui.drawable.GuiTextures;
 import brachy.modularui.integration.recipeviewer.RecipeSlotRole;
@@ -62,6 +64,11 @@ import org.jetbrains.annotations.Nullable;
  */
 @Accessors(chain = true)
 public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidget> {
+    private static final float BUTTON_STEP = 1.25f;
+    private static final float SCROLL_STEP = 1.08f;
+    private static final float SCROLL_STEP_FAST = 1.35f; //shift held
+    private static final float MIN_ZOOM = 0.15f;
+    private static final float MAX_ZOOM = 4f;
 
     private final MultiblockSet multiblockDefinition;
     private final int width;
@@ -130,7 +137,7 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                                     .height(20)
                                     .crossAxisAlignment(Alignment.CrossAxis.CENTER)
                                     .child(
-                                            RecipeViewerSlotWidget.create()
+                                            RecipeViewerSlotWidget.create(ItemStack.class)
                                                     .recipeSlotRole(RecipeSlotRole.OUTPUT)
                                                     .value(stack)
                                                     .background(IDrawable.EMPTY)
@@ -205,6 +212,14 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                                                         () -> this.multiblockSchemaInfo,
                                                         () -> this.activeIndex
                                                 ))
+                                                .child(new ButtonWidget<>()
+                                                        .onMousePressed((ctx, b) -> { this.zoom(1f / BUTTON_STEP); return true; })
+                                                        .overlay(Text.dynamic(() -> Component.literal("+")))
+                                                        .tooltip(r -> r.addLine(Lang.ZOOM_IN.text())))
+                                                .child(new ButtonWidget<>()
+                                                        .onMousePressed((ctx, b) -> { this.zoom(BUTTON_STEP); return true; })
+                                                        .overlay(Text.dynamic(() -> Component.literal("-")))
+                                                        .tooltip(r -> r.addLine(Lang.ZOOM_OUT.text())))
 
                                 )
                 );
@@ -245,7 +260,7 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
                 final MultiblockSchemaInfo.SchemaData previousData = this.multiblockSchemaInfo.getSchema(previousIndex);
 
                 if (previousData.structureBlocks().size() == data.structureBlocks().size()) {
-                    scale = previousData.scale();
+                    scale = this.multiblockSchemaInfo.getMultiSchema().getScale(); // scale sometimes flicked with the previous implementation
                 }
             }
         } else {
@@ -254,18 +269,35 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
             scale = data.scale();
         }
 
-        this.multiblockSchemaInfo.setRenderer(new MultiblockRenderer(data));
-        SchemaWidget schema = this.multiblockSchemaInfo.getRenderer().asWidget()
-                .listenGuiAction(this.setBlockOnClick)
-                .tooltipDynamic(text -> {
-                    BlockHitResult hit = this.multiblockSchemaInfo.getRenderer().lastRayTrace();
+        MultiblockRenderer renderer = new MultiblockRenderer(data);
+        this.multiblockSchemaInfo.setRenderer(renderer);
+
+        SchemaWidget schema = new SchemaWidget(renderer) {
+            @Override
+            public boolean onMouseScrolled(final double scrollX, final double scrollY) {
+                if (!isEnableScaling()) return false;
+                final double amount = scrollY != 0 ? scrollY : scrollX; //shift + scroll can arrive as horizontal scroll
+                if (amount == 0) return false;
+                zoom((float) Math.pow(Screen.hasShiftDown() ? SCROLL_STEP_FAST : SCROLL_STEP, -amount));
+                return true;
+            }
+        };
+
+        schema.listenGuiAction(this.setBlockOnClick)
+                .tooltipDynamic(r -> {
+                    BlockHitResult hit = renderer.lastRayTrace();
                     if (hit != null && hit.getType() == HitResult.Type.BLOCK) {
                         BlockState state = data.mapSchema().getLevel()
                                 .getBlockState(hit.getBlockPos());
                         ItemStack pickedItem = state.getCloneItemStack(hit,
                                 data.mapSchema().getLevel(), hit.getBlockPos(),
                                 this.getContext().getMC().player);
-                        text.addFromItem(pickedItem);
+                        MCHelper.getItemToolTip(pickedItem).forEach(r::addLine);
+
+                        MultiblockSchemaInfo.HatchData hatch = data.hatchData().get(hit.getBlockPos());
+                        if (hatch != null) {
+                            hatch.tooltip().forEach(r::addLine);
+                        }
                     }
                 }).tooltipAutoUpdate(true)
                 .size(this.width, this.height)
@@ -290,7 +322,13 @@ public class MultiblockPreviewWidget extends ParentWidget<MultiblockPreviewWidge
         }
     }
 
-
+    // factor < 1 -> zoom in, factor > 1 -> zoom out
+    private void zoom(final float factor) {
+        final SchemaWidget widget = this.multiblockSchemaInfo.getMultiSchema();
+        if (widget == null) return;
+        final float base = this.multiblockSchemaInfo.getSchema(this.activeIndex).scale();
+        widget.scale(Math.clamp(widget.getScale() * factor, base * MIN_ZOOM, base * MAX_ZOOM));
+    }
 
     /// ==== User Preference UI ======
 //    private void setPredicateDefaultBlock(PatternPredicate predicate, BasePredicate basePredicate,

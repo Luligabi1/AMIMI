@@ -10,5 +10,7 @@
   "text.amimi.OPEN_GUIDE": "Open guide page",
   "text.amimi.SHOW_HATCH_PLACEMENTS": "Show Hatch Placements",
   "text.amimi.SHOW_NEXT_TIER": "Show next tier",
-  "text.amimi.SHOW_PREVIOUS_TIER": "Show previous tier"
+  "text.amimi.SHOW_PREVIOUS_TIER": "Show previous tier",
+  "text.amimi.ZOOM_IN": "Zoom in",
+  "text.amimi.ZOOM_OUT": "Zoom out"
 }

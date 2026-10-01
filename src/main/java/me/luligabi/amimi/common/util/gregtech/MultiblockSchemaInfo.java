@@ -22,6 +22,7 @@ import brachy.modularui.drawable.SchemaRenderer;
 import brachy.modularui.widgets.SchemaWidget;
 import lombok.Getter;
 import lombok.Setter;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -77,25 +78,29 @@ public class MultiblockSchemaInfo {
 
         for (final ShapeTemplate st : multiblockDefinition.shapeTemplates()) {
             final Map<BlockPos, BlockInfo> structureBlocks = new HashMap<>();
+            final Map<BlockPos, HatchData> hatchData = new HashMap<>();
             structureBlocks.put(BlockPos.ZERO, BlockInfo.fromBlock(controller));
 
             for (var entry : st.simpleMembers.entrySet()) {
-                structureBlocks.put(entry.getKey(), BlockInfo.fromBlockState(entry.getValue().getPreviewState()));
+                final BlockPos original = entry.getKey();
+                final BlockPos pos = new BlockPos(-original.getX(), original.getY(), original.getZ()); // invert X coordinate of the original BlockPos
+                final BlockState state = entry.getValue().getPreviewState().mirror(Mirror.FRONT_BACK); // necessary for positional blocks like stairs
+
+                structureBlocks.put(pos, BlockInfo.fromBlockState(state));
+
+                final HatchFlags flags = st.hatchFlags.get(original);
+                if (flags != null && !flags.values().isEmpty()) {
+                    hatchData.put(pos, HatchUtils.parseHatchFlags(flags)); // same applies to hatches
+                }
             }
 
             final Long2ReferenceMap<BlockState> schemaMap = new Long2ReferenceOpenHashMap<>();
             final Map<Block, Integer> countsByBlock = new LinkedHashMap<>();
-            final Map<BlockPos, HatchData> hatchData = new HashMap<>();
 
             for (var entry : structureBlocks.entrySet()) {
                 final BlockState state = entry.getValue().getBlockState();
                 schemaMap.put(entry.getKey().asLong(), state);
                 countsByBlock.merge(state.getBlock(), 1, Integer::sum);
-
-                final HatchFlags hatchFlags = st.hatchFlags.get(entry.getKey());
-                if (hatchFlags != null && !hatchFlags.values().isEmpty()) {
-                    hatchData.put(entry.getKey(), HatchUtils.parseHatchFlags(hatchFlags));
-                }
             }
 
             final MutableSchema mapSchema = new MutableSchema(schemaMap);

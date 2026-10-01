@@ -1,6 +1,5 @@
 package me.luligabi.amimi.common.util;
 
-import aztech.modern_industrialization.MI;
 import lombok.Getter;
 import me.luligabi.amimi.common.AMIMI;
 import net.minecraft.network.chat.Component;
@@ -14,7 +13,9 @@ public enum Lang {
     SHOW_PREVIOUS_TIER("Show previous tier"),
     HIDE_HATCH_PLACEMENTS("Hide Hatch Placements"),
     SHOW_HATCH_PLACEMENTS("Show Hatch Placements"),
-    OPEN_GUIDE("Open guide page");
+    OPEN_GUIDE("Open guide page"),
+    ZOOM_IN("Zoom in"),
+    ZOOM_OUT("Zoom out");
 
     private final String root;
     @Getter
